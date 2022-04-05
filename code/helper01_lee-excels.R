@@ -57,7 +57,7 @@ filtrar_archivos <- function(ruta, patron){
   return(archivos)
 }
 
-# Acceso a los archivos ---------------------------------------------------
+# Acceso a los datos ------------------------------------------------------
 
 # lista de archivos a procesar
 archivos_tarsys <-
@@ -66,3 +66,10 @@ archivos_tarsys <-
     patron = patron_tarsys
   )
 
+# leo todas las hojas, pero no puedo añadir información sobre cada una de las hojas para
+# conocer el año-mes del dato
+ruta <- archivos_tarsys$value[1]
+ds_tarsys_2018 <-
+  excel_sheets(ruta) %>% 
+#  set_names() %>% 
+  map_dfr(read_xls, path = ruta)
