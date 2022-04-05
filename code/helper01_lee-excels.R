@@ -60,7 +60,41 @@ archivos_tarsys <-
   filtrar_archivos(
     ruta = ruta_tarsys,
     patron = patron_tarsys
+  ) %>% 
+  # añado mes y año
+  mutate(
+    archivo = value,
+    anualidad = str_extract(archivo, pattern = "\\d+"),
+    mes = str_sub(archivo, start = 46, end = 47),
+    .keep = "none"
   )
+
+ds_tarsys <- tibble()
+for (i in seq_along(archivos_tarsys$archivo)) {
+ ds <-
+  read_xls(
+    path = archivos_tarsys$archivo[i],
+    sheet = as.numeric(archivos_tarsys$mes[i]),
+    range = cell_cols(c(2:8)),
+    col_names = c("planta", "dummy1", "dummy2", "reac_gen", "reac_cons", "consumo_kw", "generacion_kw"),
+    skip = 2
+  ) %>% 
+  mutate(
+    anualidad = archivos_tarsys$anualidad[i],
+    mes = archivos_tarsys$mes[i]
+  )
+ ds_tarsys <- bind_rows(ds_tarsys, ds)
+ rm(ds)
+}
+# filtro algunos datos que se han colado, no funciona skip=2
+ds_tarsys <-
+  ds_tarsys %>% 
+  filter(
+    !is.na(planta),
+    planta != "Planta"
+  )
+
+
 
 
 # leo todas las hojas, pero no puedo añadir información sobre cada una de las hojas para
