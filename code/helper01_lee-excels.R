@@ -42,12 +42,8 @@ filtrar_archivos <- function(ruta, patron){
     mutate(
       mes = str_extract(mes, pattern = "\\d+") %>% as.integer()
     ) %>% 
-    group_by(aaaa) %>% 
-    # filtro para el máximo mes de cada anualidad
-    filter(
-      mes == max(mes)
-    ) %>% 
-    # y posteriormente, para la última versión
+    group_by(aaaa, mes) %>% 
+    # filtro la última versión de cada mes
     filter(
       version == max(version)
     ) %>% 
@@ -65,6 +61,7 @@ archivos_tarsys <-
     ruta = ruta_tarsys,
     patron = patron_tarsys
   )
+
 
 # leo todas las hojas, pero no puedo añadir información sobre cada una de las hojas para
 # conocer el año-mes del dato
