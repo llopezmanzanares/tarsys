@@ -53,6 +53,22 @@ filtrar_archivos <- function(ruta, patron){
   return(archivos)
 }
 
+extrae_datos <- function(archivos_lst) {
+  # contenedor de los datos
+  ds_all <- tibble()
+  
+  for (i in seq_along(archivos_lst[[1]])) {
+    ds <-
+      read_xls(
+        path = archivos_lst[[i,1]],
+        sheet = as.numeric(archivos_lst[[i,3]]),
+        range = cell_cols(c(2:8)),
+        col_names = c("planta", "dummy1", "dummy2", "reac_gen_kw", "reac_cons_kw", "consumo_kw", "generacion_kw"),
+        skip = 2
+      )
+  }
+}
+
 # Acceso a los datos ------------------------------------------------------
 
 # lista de archivos a procesar
@@ -76,12 +92,15 @@ for (i in seq_along(archivos_tarsys$archivo)) {
     path = archivos_tarsys$archivo[i],
     sheet = as.numeric(archivos_tarsys$mes[i]),
     range = cell_cols(c(2:8)),
-    col_names = c("planta", "dummy1", "dummy2", "reac_gen", "reac_cons", "consumo_kw", "generacion_kw"),
+    col_names = c("planta", "dummy1", "dummy2", "reac_gen_kw", "reac_cons_kw", "consumo_kw", "generacion_kw"),
     skip = 2
   ) %>% 
   mutate(
     anualidad = archivos_tarsys$anualidad[i],
-    mes = archivos_tarsys$mes[i]
+    mes = archivos_tarsys$mes[i],
+    fecha = lubridate::ym(str_c(anualidad, mes, sep = "-")) %>% 
+      lubridate::rollforward()
+    
   )
  ds_tarsys <- bind_rows(ds_tarsys, ds)
  rm(ds)
@@ -92,6 +111,27 @@ ds_tarsys <-
   filter(
     !is.na(planta),
     planta != "Planta"
+  ) %>% 
+  select(fecha, planta, ends_with("kw")) %>% 
+  mutate(
+    across(ends_with("kw"), as.double)
+  ) %>% 
+  # al transformar en número hay una fila con valor "---------"
+  filter(
+    !is.na(generacion_kw)
+  )
+  
+cosa <- ds_tarsys %>%   
+  # mutate(
+  #   fecha = lubridate::ym(str_c(anualidad, mes, sep = "-")) %>% 
+  #     lubridate::rollforward()
+  # ) %>% 
+  select(fecha, planta, ends_with("kw")) %>% 
+  mutate(
+    across(ends_with("kw"), as.double)
+  ) %>% 
+  filter(
+    !is.na(generacion_kw)
   )
 
 
