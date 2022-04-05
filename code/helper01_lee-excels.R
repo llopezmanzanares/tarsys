@@ -23,4 +23,6 @@ archivos_tarsys <-
   file.info() %>% 
   as_tibble(
     rownames = "archivo"
-  )
+  ) %>%
+  # solo me interesa la fecha de creación para poder quedarme con el último de cada anualidad
+  select(archivo, ctime)
