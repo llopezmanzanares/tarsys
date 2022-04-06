@@ -5,6 +5,7 @@
 # Librerias y Variables ---------------------------------------------------
 
 library(tidyverse)
+library(lubridate)
 library(readxl)
 
 ruta_tarsys <- "\\\\bender\\departamento\\Tarsys"
@@ -65,8 +66,19 @@ extrae_datos <- function(archivos_lst) {
         range = cell_cols(c(2:8)),
         col_names = c("planta", "dummy1", "dummy2", "reac_gen_kw", "reac_cons_kw", "consumo_kw", "generacion_kw"),
         skip = 2
+      ) %>% 
+      mutate(
+        anualidad = archivos_lst[[i,2]],
+        mes = archivos_lst[[i,3]],
+        fecha = ym(str_c(anualidad, mes, sep = "-")) %>% 
+          rollforward()
       )
+    ds_all <- bind_rows(ds_all, ds)
+    rm(ds)
+    
   }
+  
+  return(ds_all)
 }
 
 # Acceso a los datos ------------------------------------------------------
