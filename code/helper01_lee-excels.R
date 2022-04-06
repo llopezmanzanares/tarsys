@@ -9,11 +9,14 @@ library(lubridate)
 library(here)
 library(readxl)
 
-ruta_tarsys <- "\\\\bender\\departamento\\Tarsys"
-patron_tarsys <- "Mensuales"
+tarsys <- list(
+  ruta   = "\\\\bender\\departamento\\Tarsys",
+  patron = "Mensuales"
+)
+
 
 # funciones propias de este proceso
-source(file = here("helper01_funs.R"))
+source(file = here("code", "helper01_funs.R"))
 
 
 # Acceso a los datos ------------------------------------------------------
@@ -21,8 +24,8 @@ source(file = here("helper01_funs.R"))
 # lista de archivos a procesar
 archivos_tarsys <-
   filtrar_archivos(
-    ruta = ruta_tarsys,
-    patron = patron_tarsys
+    ruta = tarsys$ruta,
+    patron = tarsys$patron
   )
 
 # datos
