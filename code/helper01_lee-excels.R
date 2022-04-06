@@ -97,54 +97,24 @@ archivos_tarsys <-
     .keep = "none"
   )
 
-ds_tarsys <- tibble()
-for (i in seq_along(archivos_tarsys$archivo)) {
- ds <-
-  read_xls(
-    path = archivos_tarsys$archivo[i],
-    sheet = as.numeric(archivos_tarsys$mes[i]),
-    range = cell_cols(c(2:8)),
-    col_names = c("planta", "dummy1", "dummy2", "reac_gen_kw", "reac_cons_kw", "consumo_kw", "generacion_kw"),
-    skip = 2
-  ) %>% 
-  mutate(
-    anualidad = archivos_tarsys$anualidad[i],
-    mes = archivos_tarsys$mes[i],
-    fecha = lubridate::ym(str_c(anualidad, mes, sep = "-")) %>% 
-      lubridate::rollforward()
-    
-  )
- ds_tarsys <- bind_rows(ds_tarsys, ds)
- rm(ds)
-}
-# filtro algunos datos que se han colado, no funciona skip=2
-ds_tarsys <-
-  ds_tarsys %>% 
-  filter(
-    !is.na(planta),
-    planta != "Planta"
-  ) %>% 
+ds_tarsys <- 
+  extrae_datos(archivos_tarsys) %>% 
   select(fecha, planta, ends_with("kw")) %>% 
-  mutate(
-    across(ends_with("kw"), as.double)
-  ) %>% 
-  # al transformar en número hay una fila con valor "---------"
+  # limpieza de datos
   filter(
-    !is.na(generacion_kw)
-  )
-  
-cosa <- ds_tarsys %>%   
-  # mutate(
-  #   fecha = lubridate::ym(str_c(anualidad, mes, sep = "-")) %>% 
-  #     lubridate::rollforward()
-  # ) %>% 
-  select(fecha, planta, ends_with("kw")) %>% 
+    planta != "Planta",
+    !is.na(planta)
+  ) %>% 
+  # los números aparecen como character, debido a que una fila es "------" 
+  # no ha funcionado skip=2 en read_xls
   mutate(
     across(ends_with("kw"), as.double)
   ) %>% 
   filter(
     !is.na(generacion_kw)
   )
+
+
 
 
 
