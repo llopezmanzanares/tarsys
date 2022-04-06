@@ -33,16 +33,18 @@ ds_tarsys <-
   extrae_datos(archivos_tarsys) %>% 
   select(fecha, planta, ends_with("kw")) %>% 
   # limpieza de datos
+  # los números aparecen como character, debido a que no ha funcionado skip=2 en read_xls
+  # y pilla la fila de cabecera como si fueran datos
+  # 1o quito las cabeceras de los datos originales
   filter(
     planta != "Planta",
     !is.na(planta)
   ) %>% 
-  # los números aparecen como character, debido a que una fila es "------" 
-  # no ha funcionado skip=2 en read_xls
   mutate(
     across(ends_with("kw"), as.double)
-  ) %>% 
-  filter(
-    !is.na(generacion_kw)
   )
 
+
+# Guardo los datos --------------------------------------------------------
+
+save(ds_tarsys, file = here("data", "tarsys.RData"))
