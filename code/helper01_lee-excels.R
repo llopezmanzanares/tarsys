@@ -46,15 +46,3 @@ ds_tarsys <-
     !is.na(generacion_kw)
   )
 
-
-
-
-
-
-# leo todas las hojas, pero no puedo añadir información sobre cada una de las hojas para
-# conocer el año-mes del dato
-ruta <- archivos_tarsys$value[1]
-ds_tarsys_2018 <-
-  excel_sheets(ruta) %>% 
-#  set_names() %>% 
-  map_dfr(read_xls, path = ruta)
